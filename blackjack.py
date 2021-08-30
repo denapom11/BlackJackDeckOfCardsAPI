@@ -5,6 +5,18 @@ import chip
 import sys
 import time
 
+decision_logger = []
+
+def decision_log(func):
+    def log_wrapper(player,dealer,hand_index=0):
+        pre_decision = {'State': 'pre', 'Name' : player.name, 'Hand' : player.hand_value(), 'Decision' : func.__name__}
+        decision_logger.append(pre_decision)
+        value = func(player,dealer,hand_index)
+        post_decision = {'State': 'post', 'Name' : player.name, 'Hand' : player.hand_value(), 'Decision' : func.__name__}
+        decision_logger.append(post_decision)
+        return value
+    return log_wrapper
+
 def display_instructions() :
     print('\nInstructions: The objective of this game is to obtain a hand of cards whose value is as close to 21 ')
     print('as possible without going over. The numbered cards have the value of their number, face cards have ')
@@ -26,7 +38,7 @@ def display_instructions() :
     
 def get_num_players() :
     num = input('How many people will be playing (up to 7)? Enter a number: ')
-    while not num.isdigit() or int(num) < 1 or int(num) > 7:
+    while not num.isdigit() or int(num) <= 1 or int(num) >= 7:
         num = input('Please enter a number from 1 to 7: ')
     print('\nGreat! Now decide amongst yourselves the order you all will be playing in (who will be Player 1 through 7).\n')
     time.sleep(1)
@@ -74,7 +86,7 @@ def view_hands(players) :
                     print(f' ==> BLACKJACK!!! -- {p.name} wins ${p.bet}!')
                 else : print()
     print()
-    
+
 def do_decision(player, dealer, hand_index=0) :
     choices_dict = {'s':stand, 'h':hit, 'p':split, 'd':double_down}
     valid_choice = False
@@ -142,11 +154,13 @@ def cycle_decisions(players) :
         else :
             if not p.check_blackjack() and not p.check_broke() :
                 do_decision(p, dealer)
-        
+
+@decision_log
 def stand(player, dealer, hand_index=0) :
     print(f'{player.name} stands.\n')
     return True
-        
+
+@decision_log        
 def hit(player, dealer, hand_index=0) :
     dealer.deal_card(player, hand_index)
     done = check_status(player, hand_index)
@@ -171,7 +185,8 @@ def hit(player, dealer, hand_index=0) :
                     choice = input('Enter either \'y\' or \'n\': ')
         if not done : print()
     return True
-     
+
+@decision_log    
 def split(player, dealer, hand_index=0) :
     if player.hand[hand_index][0] != player.hand[hand_index][1] :
         print('You can\'t split on that hand! You need two identical cards to split. Choose again.')
@@ -187,7 +202,7 @@ def split(player, dealer, hand_index=0) :
         do_decision(player, dealer, i)  
     return True
     
-     
+@decision_log     
 def double_down(player, dealer, hand_index=0) :
     if player.bet*2 > player.money :
         print(f'You don\'t have enough money to do that (${player.bet} * 2 = ${player.bet*2})! Choose again.')
@@ -296,6 +311,7 @@ def main() :
     display_accounts(players)
     sys.stdout.flush()    
     time.sleep(0.2)
+    print(decision_logger)
     print('------------------------------------------------------------------------------------------------\n')
     print('Goodbye!')
     
