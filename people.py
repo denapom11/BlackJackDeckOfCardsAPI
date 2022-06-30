@@ -18,6 +18,7 @@ class Player() :
         
     def adjust_money(self, adjustment) :
         self.money += adjustment
+        self.chips = chip.convert_to_chips(self.money)
         
     def return_cards(self) :
         self.hand = [[]]
