@@ -9,7 +9,9 @@ class Chip() :
         return f'${self.value}'
 
 # NEVER use second and third parameters     
-def convert_to_chips(amount, dict={}, i=len(Chip.values)-1) :
+def convert_to_chips(amount, dict=None, i=len(Chip.values)-1) :
+    if dict is None:
+        dict = {}
     if amount <= 0 :
         while i >= 0 :
             dict[f'${Chip.values[i]} chip'] = 0
